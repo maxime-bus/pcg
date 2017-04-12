@@ -9,29 +9,32 @@ module Distribution
 import qualified Data.Map as Map
 import System.IO
 
-type Distribution = (Map.Map CharacterPair Integer)
-type CharacterPair = (Char, Char)
+type Distribution = (Map.Map String Int)
 
-computeDistribution :: [String] -> Distribution
-computeDistribution = foldr (computeStatisticsOnWord) Map.empty 
+computeDistribution :: Int -> [String] -> Distribution
+computeDistribution order = foldr (computeStatisticsOnWord order) Map.empty 
 
-computeStatisticsOnWord :: String -> Distribution -> Distribution
-computeStatisticsOnWord [] _ = Map.empty
-computeStatisticsOnWord (c:chars) d = computeStatisticsOnWord' chars (updateCharacterPair ('^', c) d)
+computeStatisticsOnWord :: Int -> String -> Distribution -> Distribution
+computeStatisticsOnWord _ [] _ = Map.empty
+computeStatisticsOnWord order w d = 
+    let w' = (take order $ repeat '^') ++ w
+    in computeStatisticsOnWord' (order+1) w' d
 
-computeStatisticsOnWord' :: String -> Distribution -> Distribution
-computeStatisticsOnWord' [] d = d
-computeStatisticsOnWord' [c] d = updateCharacterPair (c, '$') d
-computeStatisticsOnWord' (c1:c2:chars) d = let d' = updateCharacterPair (c1, c2) d
-                                           in computeStatisticsOnWord' (c2:chars) d'
+computeStatisticsOnWord' :: Int -> String -> Distribution -> Distribution
+computeStatisticsOnWord' _ [] d = d
+computeStatisticsOnWord' order word d
+    | length word == order = updateCharacterPair word d
+    | otherwise            = let d' = updateCharacterPair (take order word) d
+                             in computeStatisticsOnWord' order (tail word) d'
+                             
 
-updateCharacterPair :: CharacterPair -> Distribution -> Distribution
+updateCharacterPair :: String -> Distribution -> Distribution
 updateCharacterPair pair d = Map.insertWith (\ newValue oldValue -> newValue + oldValue) pair 1 d
 
 toFile :: Distribution -> FilePath -> IO ()
 toFile d path = do
 
-    let content = unlines $ map (\ ((a, b), c) -> a:b:" " ++ (show c)) $ Map.toList d
+    let content = unlines $ map (\ (k, c) -> k ++ " " ++ (show c)) $ Map.toList d
 
     writeFile path content
 
@@ -39,4 +42,4 @@ fromFile :: FilePath -> IO (Distribution)
 fromFile path = do
     content <- fmap (lines) $ readFile path
 
-    return $ foldr (\ (c1:c2:_:number) m -> Map.insert (c1, c2) (read number) m) Map.empty content
+    return $ foldr (\ line m -> Map.insert (head $ words line) (read (last $ words line)) m) Map.empty content
