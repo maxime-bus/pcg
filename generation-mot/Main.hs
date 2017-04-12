@@ -22,10 +22,13 @@ dictionary = [ "maxime"
              , "mathieu"
              , "antoine"
              ]
+ 
+computeWord :: Int -> Distribution -> IO String
+computeWord length dist@(Distribution order d) = computeWord' length (take order $ repeat '^') dist 
 
-computeWord :: Int -> Int -> String -> Distribution -> IO String
-computeWord _ 0 w _ = return w
-computeWord o l w d = do
+computeWord' :: Int -> String -> Distribution -> IO String
+computeWord' 0 w _ = return w
+computeWord' l w dist@(Distribution o d) = do
     let endOfWord        = reverse (take (o) $ reverse w)
         potentialLetters = Map.toList $ Map.filterWithKey (\ k _ -> init k == endOfWord) d
         sorted           = sortBy (\ c p -> if (snd c) > (snd p) then GT else LT) potentialLetters
@@ -37,7 +40,7 @@ computeWord o l w d = do
 
     letter <- computeLetter 0 total sorted
 
-    computeWord o (l - 1) (w ++ letter) d
+    computeWord' (l - 1) (w ++ letter) dist
 
 computeLetter :: Int -> Int -> [(String, Int)] -> IO String
 computeLetter _ _ [] = return ""
@@ -61,16 +64,20 @@ computeLetter prev total (d:dist) = do
 
 main = do
     args <- getArgs
-    --handle <- openFile "communes.txt" ReadMode
-    --contents <- hGetContents handle
     
-    --let distribution = computeDistribution 2 (lines contents)
+    let wordLength = read $ args !! 0 :: Int
+        order      = read $ args !! 1 :: Int
+	file       = args !! 2
+    handle <- openFile file ReadMode
+    contents <- hGetContents handle
+    
+    let distribution = computeDistribution order (lines contents)
 
-    --toFile distribution "distribution.txt"
-    --distribution <- fromFile "distribution.txt"
+    toFile distribution "distribution_prenoms.txt"
+    --distribution <- fromFile "distribution_prenoms.txt"
 
-    let distribution = computeDistribution 2 dictionary
+    --let distribution = computeDistribution 2 dictionary
 
-    word <- computeWord 2 (read (args !! 0)) "^^" distribution
+    word <- computeWord (read (args !! 0)) distribution
 
     putStrLn word
