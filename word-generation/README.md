@@ -6,6 +6,17 @@ The algorithm is slow :/. This project was just about training in haskell langua
 
     ghc --make Main.hs
 
+# Groland cities - Hall Of Fame :)
+
+French generated cities :
+
+- quenaud-mérolière
+- peypin-monjaulzy
+- tabrezac
+- rigneval
+- fay-le-médard-notre-de-philbertran
+- pettoncourcourdon
+
 # How to use
 
 ## First : build a distribution with a given order
