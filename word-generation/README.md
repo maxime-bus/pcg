@@ -14,7 +14,7 @@ The algorithm is slow :/. This project was just about training in haskell langua
 # data is one these two files : communes.txt, prenoms.txt
 # The higher the order, the more precise are the words but less creative they are.
 
-./Main generateDistribution data order
+./Main genDist data order
 
 # This command generate a .dist file (e.g communes.txt.dist)
 ```
@@ -31,7 +31,7 @@ The algorithm is slow :/. This project was just about training in haskell langua
 
 ### Example 
 
-    ./Main generateWord prenoms.txt.dist
+    ./Main genWord prenoms.txt.dist
 
 # Troubleshooting
 
