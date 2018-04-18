@@ -10,6 +10,25 @@ import qualified Data.Map as Map
 type Order = Int
 data Distribution = Distribution Order (Map.Map String Int)
 
+prependBeginCharacter :: String -> String
+prependBeginCharacter word = '^':word
+
+appendEndCharacter :: String -> String
+appendEndCharacter word = word ++ "$"
+
+wrapWord :: String -> String
+wrapWord = prependBeginCharacter . appendEndCharacter
+
+-- "word" : ["wo", "or", "rd"]
+-- "longword" : ["lon", "ong", "ngw", "gwo", "wor", "ord"]
+cutWord :: Int -> String -> [String]
+cutWord order word 
+    | length word <= order = [word]
+    | otherwise            = (take order word) : (cutWord order (tail word))
+
+decorateWord :: Int -> String -> String
+decorateWord order word = foldr ($) word (replicate (order-1) wrapWord)
+ 
 computeDistribution :: Order -> [String] -> Distribution
 computeDistribution order = foldr (computeStatisticsOnWord) (Distribution order Map.empty)
 
